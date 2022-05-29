@@ -1,0 +1,9 @@
+.plans-page{
+    width: 80%;
+    margin: auto;
+}
+
+.plan-row:hover{
+    background-color: beige;
+    cursor: pointer;
+}
