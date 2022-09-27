@@ -128,17 +128,7 @@ export default function AutofillModal(props) {
             sx={{ marginLeft: "20px" }}
             onClick={() => {
               props.saveOldDays();
-              autofillPlan({
-                planId: planId,
-                noShortSwitches: noShortSwitches,
-                no2SaInMonth: no2SaInMonth,
-                no2SaInRow: no2SaInRow,
-                no2WeInRow: no2WeInRow,
-                setProgress: setProgress,
-                iterations: iterations,
-                respectClinic: respectClinic,
-                doRefresh: doRefresh
-              });
+              autofillPlan(planId);
               closeAutofillModal();
               setOpenProgress(true);
             }}
