@@ -30,10 +30,10 @@ const mergeDoctorsAndWishesData = (doctorsData, wishesData) => {
   return doctors;
 };
 
-const calcEmergencyDepartmentFitness = (day) => {
+const calcDayFitness = (day, line) => {
   const WEEKDAY_FACTOR = 1
   const HOLIDAY_FACTOR = 1
-  const AVAILABLE_DOCTORS_FACTOR = 1
+  const NOT_AVAILABLE_DOCTORS_FACTOR = 1
   const DOCTORS_MEAN_FITTNESS_FACTOR = 1
   const CLINIC_STACKING_FACTOR = 1
 
@@ -46,16 +46,11 @@ const calcEmergencyDepartmentFitness = (day) => {
   return fitness;
 };
 
-const calcHouseFitness = (day) => {
-  let fitness = 1;
-  return fitness;
-};
-
 const calcDutyAssignmentPrioList = (daysData, doctors) => {
   const dutyAssignmentFitnessList = [];
   daysData.forEach((day) => {
-    dutyAssignmentFitnessList.push([day, calcEmergencyDepartmentFitness(day)]);
-    dutyAssignmentFitnessList.push([day, calcHouseFitness(day)]);
+    dutyAssignmentFitnessList.push([day, calcDayFitness(day, "emergencyDepartment")]);
+    dutyAssignmentFitnessList.push([day, calcDayFitness(day, "house")]);
   });
   return dutyAssignmentFitnessList.sort((a, b) => a[1] - b[1]);
 };
