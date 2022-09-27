@@ -78,7 +78,7 @@ const calcDutyAssignmentPrioList = (daysData, doctors) => {
       calcDayFitness(day, "house", doctors),
     ]);
   });
-  return dutyAssignmentFitnessList.sort((a, b) => a[1] - b[1]);
+  return dutyAssignmentFitnessList.sort((a, b) => b[1] - a[1]);
 };
 
 export default async function autofillPlan(planId, setProgress) {
