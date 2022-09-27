@@ -128,7 +128,7 @@ export default function AutofillModal(props) {
             sx={{ marginLeft: "20px" }}
             onClick={() => {
               props.saveOldDays();
-              autofillPlan(planId);
+              autofillPlan(planId, setProgress);
               closeAutofillModal();
               setOpenProgress(true);
             }}
