@@ -30,18 +30,38 @@ const mergeDoctorsAndWishesData = (doctorsData, wishesData) => {
   return doctors;
 };
 
+const calcNotAvailableDoctors = (day, line, doctors) => {
+  let counter = 0;
+
+  doctors.forEach((doctor) => {
+    if (doctor[line] && doctor.noDutyWish.includes(day.day)) {
+      counter += 1;
+    }
+  });
+
+  return counter;
+};
+
 const calcDayFitness = (day, line, doctors) => {
-  const WEEKDAY_FACTOR = 1
-  const HOLIDAY_FACTOR = 1
-  const NOT_AVAILABLE_DOCTORS_FACTOR = 1
-  const DOCTORS_MEAN_FITTNESS_FACTOR = 1
-  const CLINIC_STACKING_FACTOR = 1
+  const WEEKDAY_FACTOR = 1;
+  const HOLIDAY_FACTOR = 1;
+  const NOT_AVAILABLE_DOCTORS_FACTOR = 1;
+  const DOCTORS_MEAN_FITTNESS_FACTOR = 1;
+  const CLINIC_STACKING_FACTOR = 1;
 
   let fitness = 1;
 
-  if(day.weekday === 6){fitness += 2*WEEKDAY_FACTOR}
-  if(day.weekday === 5 || day.weekday === 0){fitness += 1*WEEKDAY_FACTOR}
-  if(day.holiday){fitness += 1*HOLIDAY_FACTOR}
+  if (day.weekday === 6) {
+    fitness += 2 * WEEKDAY_FACTOR;
+  }
+  if (day.weekday === 5 || day.weekday === 0) {
+    fitness += 1 * WEEKDAY_FACTOR;
+  }
+  if (day.holiday) {
+    fitness += 1 * HOLIDAY_FACTOR;
+  }
+  fitness +=
+    calcNotAvailableDoctors(day, line, doctors) * NOT_AVAILABLE_DOCTORS_FACTOR;
 
   return fitness;
 };
@@ -49,8 +69,14 @@ const calcDayFitness = (day, line, doctors) => {
 const calcDutyAssignmentPrioList = (daysData, doctors) => {
   const dutyAssignmentFitnessList = [];
   daysData.forEach((day) => {
-    dutyAssignmentFitnessList.push([day, calcDayFitness(day, "emergencyDepartment", doctors)]);
-    dutyAssignmentFitnessList.push([day, calcDayFitness(day, "house", doctors)]);
+    dutyAssignmentFitnessList.push([
+      day,
+      calcDayFitness(day, "emergencyDepartment", doctors),
+    ]);
+    dutyAssignmentFitnessList.push([
+      day,
+      calcDayFitness(day, "house", doctors),
+    ]);
   });
   return dutyAssignmentFitnessList.sort((a, b) => a[1] - b[1]);
 };
