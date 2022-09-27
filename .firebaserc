@@ -1,0 +1,14 @@
+{
+  "projects": {
+    "default": "dienstplan-b5ca7"
+  },
+  "targets": {
+    "dienstplan-b5ca7": {
+      "hosting": {
+        "admin": [
+          "dienstplan-kmg-admin"
+        ]
+      }
+    }
+  }
+}

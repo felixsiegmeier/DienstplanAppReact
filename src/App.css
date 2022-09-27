@@ -1,38 +1,127 @@
-.App {
+h1{
+  color: green
+}
+
+h2{
+  color: orange;
+  margin-top: 50px;
+}
+
+h2.plan-page-h2{
+  margin-top: 20px;
+  margin-bottom: 50px;
+}
+
+table{
+  border-collapse: collapse;
+  margin: 30px auto
+}
+
+.body{
+  margin-top: 30px;
+  width: 95%;
   text-align: center;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+.field{
+  border: solid black 2px;
+  background-color: whitesmoke;
+  border-radius: 7px;
+  width: 27px;
+  height: 27px;
+  cursor: pointer;
+  display: inline-block;
+  margin-left: .5px;
+  margin-right: .5px;
+}
+.field:hover{
+  border: solid orange 2px
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+.no-duty-wish{
+  background-color: red;
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+.duty-wish{
+  background-color: #68c95f;
 }
 
-.App-link {
-  color: #61dafb;
+.duty{
+  background-color: #63d5f7;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.representing-field-cell{
+  padding: 0;
+}
+
+.free-day{
+  background-color: lightslategray;
+}
+
+.new-wish-dropdown{
+  width: 200px;
+  margin-top: 30px;
+  margin: 30px auto;
+}
+
+.doctor-name-cell{
+  padding-right: 10px;
+}
+
+.doctors-table{
+  width: 95%;
+  display: inline-block;
+}
+
+.delete-icon{
+  cursor: pointer;
+  font-size: 4.5em;
+}
+
+.doctors-button{
+  margin-top: 50px;
+}
+
+.year-label{
+  font-size: 2rem;
+  color: orange;
+  margin-bottom: 40px;
+}
+
+.new-plan-title{
+  margin-top: 10px;
+  margin-bottom: 30px;
+}
+
+.plan-table-cell{
+  width: 120px;
+  height: 20px;
+  text-align: center;
+  border: 1px solid black;
+  cursor: pointer;
+}
+
+.plan-table-cell:hover{
+  background-color: #fff0cc;
+}
+
+.doctor-select-popover{
+  text-align: center;
+  width: 300px;
+  height: 180px;
+}
+
+.summary-table-cell{
+  border: 1px solid black;
+  height: 20px;
+  min-width: 120px;
+}
+
+.autofill-switch-container{
+  padding-left: 200px;
+  text-align: left;
+}
+
+.doctor-grid-table-row:hover{
+  background-color: #fff0cc;
 }
