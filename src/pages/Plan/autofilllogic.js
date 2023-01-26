@@ -33,7 +33,9 @@ export const calcNotAvailableDoctors = (daysData, day, line, doctors) => {
   || !doctor[line]
   || (day.imc.includes(doctor.id) || day.emergencyDepartment.includes(doctor.id) || day.house.includes(doctor.id))
   || (previousDay && (previousDay.imc.includes(doctor.id) || previousDay.emergencyDepartment.includes(doctor.id) || previousDay.house.includes(doctor.id)))
-  || (nextDay && (nextDay.imc.includes(doctor.id) || nextDay.emergencyDepartment.includes(doctor.id) || nextDay.house.includes(doctor.id))))
+  || (nextDay && (nextDay.imc.includes(doctor.id) || nextDay.emergencyDepartment.includes(doctor.id) || nextDay.house.includes(doctor.id)))
+  || (!isBeforeWeekendOrHoliday(daysData, day) && mostFrequentClinic(day, doctors)[doctor.clinic] && mostFrequentClinic(day, doctors)[doctor.clinic] > 1)
+  )
   ).length;
   };
 
@@ -70,24 +72,13 @@ function mostFrequentClinic(day, doctors) {
       });
     }
   });
-  if (Object.keys(clinicFrequency).length > 0) {
-    // find the clinic with the highest frequency
-    const mostFrequentClinic = Object.keys(clinicFrequency).reduce((a, b) => 
-      clinicFrequency[a] > clinicFrequency[b] ? a : b
-    );
-    // return the frequency of the most frequent clinic
-    console.log(clinicFrequency)
-    return clinicFrequency[mostFrequentClinic];
-  } else {
-    return 0;
-  }
+  return clinicFrequency;
 }
 
 const calcDayFitness = (daysData, day, line, doctors) => {
   const WEEKDAY_FACTOR = 1;
   const HOLIDAY_FACTOR = 1;
   const NOT_AVAILABLE_DOCTORS_FACTOR = 1;
-  const CLINIC_STACKING_FACTOR = 1;
 
   let fitness = 1;
 
@@ -102,10 +93,6 @@ const calcDayFitness = (daysData, day, line, doctors) => {
   }
   fitness +=
     calcNotAvailableDoctors(daysData, day, line, doctors) * NOT_AVAILABLE_DOCTORS_FACTOR;
-
-  if (!isBeforeWeekendOrHoliday(daysData, day)) {
-    fitness += mostFrequentClinic(day, doctors) * CLINIC_STACKING_FACTOR;
-  }
 
   return fitness;
 };

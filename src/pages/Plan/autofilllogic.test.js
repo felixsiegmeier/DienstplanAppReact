@@ -10,7 +10,7 @@ const doctors = [
       wish: [ 23, 28, 16 ],
       noDutyWish: [
         11, 11, 13, 23, 26,
-        18,  9,  3,  2,  1,
+        19,  9,  3,  2,  1,
          2
       ],
       only12: false,
@@ -24,8 +24,7 @@ const doctors = [
       imc: true,
       wish: [ 12, 26, 21, 4 ],
       noDutyWish: [
-        16, 14, 17,  3, 27,
-        19,  6, 17, 20, 12
+        16, 14, 17,  3, 27, 19, 6, 17, 20, 12
       ],
       only12: false,
       clinic: 'Gastroenterologie'
@@ -38,8 +37,7 @@ const doctors = [
       imc: true,
       wish: [ 12, 26, 21, 4 ],
       noDutyWish: [
-        16, 14, 17,  3, 27,
-        19,  6, 17, 20, 12
+        16, 14, 17,  3, 27,  6, 17, 20, 12
       ],
       only12: true,
       clinic: 'Kardiologie'
@@ -53,10 +51,54 @@ const doctors = [
       wish: [ 12, 26, 21, 4 ],
       noDutyWish: [
         16, 14, 17,  3, 27,
-        19,  6, 17, 20, 12
+        6, 17, 20, 12
       ],
       only12: false,
       clinic: 'Kardiologie'
+    },
+    {
+      name: 'Dr. 5',
+      id: 'dr5',
+      emergencyDepartment: true,
+      house: true,
+      imc: true,
+      wish: [],
+      noDutyWish: [],
+      only12: false,
+      clinic: 'Rhythmologie'
+    },
+    {
+      name: 'Dr. 6',
+      id: 'dr6',
+      emergencyDepartment: true,
+      house: true,
+      imc: true,
+      wish: [],
+      noDutyWish: [],
+      only12: false,
+      clinic: 'Rhythmologie'
+    },
+    {
+      name: 'Dr. 7',
+      id: 'dr7',
+      emergencyDepartment: true,
+      house: true,
+      imc: true,
+      wish: [],
+      noDutyWish: [],
+      only12: false,
+      clinic: 'Rhythmologie'
+    },
+    {
+      name: 'Dr. 8',
+      id: 'dr8',
+      emergencyDepartment: true,
+      house: true,
+      imc: true,
+      wish: [],
+      noDutyWish: [],
+      only12: false,
+      clinic: 'Rhythmologie'
     }
   ]
 const days = [
@@ -206,8 +248,8 @@ const days = [
     },
     {
       day: 19,
-      imc: [],
-      emergencyDepartment: [],
+      imc: ["dr8"],
+      emergencyDepartment: ["dr7"],
       house: [],
       weekday: 3,
       holiday: true
@@ -218,7 +260,7 @@ const days = [
       emergencyDepartment: [],
       house: [],
       weekday: 4,
-      holiday: true
+      holiday: false
     },
     {
       day: 21,
@@ -291,4 +333,5 @@ test('Test calcNotAvailableDoctors-Function', () => {
         expect(calcNotAvailableDoctors(days, days[8], "house", doctors)).toBe(2)
         expect(calcNotAvailableDoctors(days, days[8], "house", doctors)).toBe(2)
         expect(calcNotAvailableDoctors(days, days[8], "house", doctors)).toBe(2)
+        expect(calcNotAvailableDoctors(days, days[18], "house", doctors)).toBe(6)
 });
