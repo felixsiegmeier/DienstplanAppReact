@@ -10,13 +10,15 @@ import getWishesFromDB from "../../services/getWishesFromDB";
 - Ermittle für jeden Dienst, welche Ärzte verfügbar sind
 - Ermittle für jeden Tag die Fittness
   Faktoren: Wochentag, Feiertagstatus, Anzahl verfügbarer Ärzte
-- Sortiere die Dienste in ungekehrter Reihenfolge nach der Fitness
+- Sortiere die Dienste in umgekehrter Reihenfolge nach der Fitness
 - Iteriere über die Dienste
   - Ermittle die Fitness aller Ärzte
+    Faktoren: Dienstanzahl, Dienstpunkte, Wechselabstand, Wochenendanzahl, Wochenendabstand
   - Teile den Arzt mit der besten Fitness ein
     - wenn das nicht möglich ist
       - Merke dir, dass du einen Zufallsplan erstellst
       - Starte neu und wähle auf jeder Stufe wenn möglich zufällig zwischen den 2 (..3, ..4, ..5, ..6) besten Ärzten
+      - Wenn Stufe 5 Erreicht ist dann akzeptiere "Offen"
   - entferne den Dienst aus der Liste
   - Ermittle erneut für jeden Dienst, welche Ärzte verfügbar sind
   - Ermittle erneut für jeden Tag die Fittness
