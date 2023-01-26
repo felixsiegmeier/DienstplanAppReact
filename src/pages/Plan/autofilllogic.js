@@ -7,7 +7,7 @@ import getWishesFromDB from "../../services/getWishesFromDB";
 - Erzeuge aus doctorData und wishData einen Datensatz
 - Erstelle eine Liste mit Objekten aller Dienste 
   {day, line, availableDoctors (direkt ermitteln), fitness}
-- Verteile die only12-Ärzte
+- Verteile die only12-Ärzte (geht nur über Wünsche! Keine Zufallsvergabe)
 - Trage die Wünsche wenn möglich ein
   - Ermittle nach jeder Eintragung neu, welche Ärzte verfügbar sind
 - Ermittle für jeden Tag die Fittness
@@ -32,14 +32,10 @@ import getWishesFromDB from "../../services/getWishesFromDB";
 */
 
 
-const mergeDoctorsAndWishesData = (doctorsData, wishesData) => {
-  // map over the doctorsData and for each doctorData,
+const mergeDoctorsAndWishesData = async (doctorsData, wishesData) => {
   return doctorsData.map((doctorData) => {
-    // create a new object with the properties of the doctorData and additional properties
     const doctor = { ...doctorData, dutys: [], dutyWish: [], noDutyWish: [] };
-    // find the matching wish for the doctorData based on id
     const matchingWish = wishesData.find((wish) => wish.doctorId === doctor.id);
-    // if there is a matching wish, assign the wish values to the doctor
     if (matchingWish) {
       doctor.dutyWish = [...matchingWish.dutyWish];
       doctor.noDutyWish = [...matchingWish.noDutyWish];
@@ -49,12 +45,9 @@ const mergeDoctorsAndWishesData = (doctorsData, wishesData) => {
 };
 
 const calcAvailableDoctors = (daysData, day, line, doctors) => {
-    // Find the previous day
     let previousDay = daysData.find((d) => d.day === day.day - 1);
-    // Find the next day
     let nextDay = daysData.find((d) => d.day === day.day + 1);
-    // filter the doctors array based on conditions,
-  
+
     return doctors.filter(
     (doctor) =>
     doctor[line] 
@@ -69,32 +62,24 @@ const calcAvailableDoctors = (daysData, day, line, doctors) => {
     };
 
 function isBeforeWeekendOrHoliday(daysData, day) {
-  // check if the day is a weekend day
   if (day.weekday === 5 || day.weekday === 6) {
     return true;
   }
-  // find the next day in the daysData array
   const nextDay = daysData.find((d) => d.day === day.day + 1);
-  // if the next day exists and is a holiday, return true
   if (nextDay && nextDay.holiday) {
     return true;
   }
-  // otherwise, return false
   return false;
 }
 
 function clinicFrequency(day, doctors) {
-  // create an empty object to store clinic frequencies
   const clinicFrequency = {};
   const propertiesToCheck = ["imc", "emergencyDepartment", "house"];
   propertiesToCheck.forEach((property) => {
     if (day[property]) {
       day[property].forEach((id) => {
-        // find the corresponding doctor object in the "doctors" array
         const doctor = doctors.find((doc) => doc.id === id);
-        // if the doctor object exists
         if (doctor) {
-          // increment the frequency of the clinic in the clinicFrequency object
           clinicFrequency[doctor.clinic] =
             (clinicFrequency[doctor.clinic] || 0) + 1;
         }
@@ -104,7 +89,7 @@ function clinicFrequency(day, doctors) {
   return clinicFrequency;
 }
 
-const calcDayFitness = (daysData, day, line, doctors) => {
+const calcDayFitness = (daysData, day, line, doctors, availableDoctors) => {
   const WEEKDAY_FACTOR = 1;
   const HOLIDAY_FACTOR = 1;
   const NOT_AVAILABLE_DOCTORS_FACTOR = 1;
@@ -121,36 +106,59 @@ const calcDayFitness = (daysData, day, line, doctors) => {
     fitness += 1 * HOLIDAY_FACTOR;
   }
   fitness +=
-    (doctors.length-calcAvailableDoctors(daysData, day, line, doctors).length) * NOT_AVAILABLE_DOCTORS_FACTOR;
+    (doctors.length-availableDoctors.length) * NOT_AVAILABLE_DOCTORS_FACTOR;
 
   return fitness;
 };
 
-const calcDutyAssignmentList = (daysData, doctors, lines) => {
-  const dutyAssignmentList = []
+const calcDutys = async (daysData, doctors, lines) => {
+  const dutys = []
   daysData.forEach(day => {
     lines.forEach(line => {
-      dutyAssignmentList.push({
+      const availableDoctors = calcAvailableDoctors(daysData, day, line, doctors)
+      dutys.push({
         day: day,
         line: line,
-        availableDoctors: calcAvailableDoctors(daysData, day, line, doctors),
-        fitness: 0
+        availableDoctors: availableDoctors,
+        fitness: calcDayFitness(daysData, day, line, doctors, availableDoctors)
       })
     })
   })
 
-  return dutyAssignmentList.sort((a,b) => a.availableDoctors.length - b.availableDoctors.length)
+  return dutys.filter(duty => 
+    duty.day[duty.line].length === 0
+    || (duty.day[duty.line].length === 1 && doctors.find(doctor => doctor.id === duty.day[duty.line][0]).only12)
+  ).sort((a,b) => a.availableDoctors.length - b.availableDoctors.length)
 };
 
-function assignOnly12(dutyAssignmentList, doctors){
+const reCalcDutys = (dutys, daysData, doctors) => {
+  dutys.forEach(duty => {
+    const availableDoctors = calcAvailableDoctors(daysData, duty.day, duty.line, doctors);
+    duty.availableDoctors = availableDoctors;
+    duty.fitness = calcDayFitness(daysData, duty.day, duty.line, doctors, availableDoctors);
+  });
+  return dutys;
+};
+
+async function assignOnly12(dutys, doctors){
   const docs = doctors.filter(doc => doc.only12)
-  const dutyListOnly12Assigned = [... dutyAssignmentList]
   docs.forEach(doc => {
     doc.dutyWish.forEach(wish => {
-      dutyListOnly12Assigned.find(duty => duty.line==="emergencyDepartment" && duty.day.day === wish).day.emergencyDepartment.push(doc.id)
+      dutys.find(duty => duty.line==="emergencyDepartment" && duty.day.day === wish).day.emergencyDepartment.push(doc.id)
     })
   })
-  return dutyListOnly12Assigned
+}
+
+async function assignWishes(dutys,daysData, doctors, wishesData){
+  wishesData.forEach(wish => {
+    const {dutyWish, doctorId} = wish
+    dutyWish.forEach(day => {
+      let duty = dutys.find(duty => duty.day.day === day)
+      duty && duty.availableDoctors.some(d => d.id === doctorId) && duty.day[duty.line].push(doctorId)
+      && (dutys = dutys.filter(d => d === duty))
+      reCalcDutys(dutys, daysData, doctors)
+    })
+  })
 }
 
 export default async function autofillPlan(planId, setProgress) {
@@ -158,11 +166,12 @@ export default async function autofillPlan(planId, setProgress) {
   const doctorsData = await getDoctorsFromDB();
   const wishesData = await getWishesFromDB(planId);
 
-  const doctors = mergeDoctorsAndWishesData(doctorsData, wishesData);
-  const dutyAssignmentList = calcDutyAssignmentList(daysData, doctors, ["emergencyDepartment", "house"])
-  const dutyListOnly12Assigned = assignOnly12(dutyAssignmentList, doctors)
+  const doctors = await mergeDoctorsAndWishesData(doctorsData, wishesData);
+  const dutys = await calcDutys(daysData, doctors, ["emergencyDepartment", "house"])
+  await assignOnly12(dutys, doctors)
+  await assignWishes(dutys,daysData, doctors, wishesData)
 
-  console.log(dutyListOnly12Assigned);
+  console.log(daysData);
 
   setProgress(100);
   return true;
