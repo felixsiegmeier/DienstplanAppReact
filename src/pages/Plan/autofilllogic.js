@@ -6,8 +6,10 @@ import getWishesFromDB from "../../services/getWishesFromDB";
 - Hole doctorData, wishData und daysData von der Datenbank
 - Erzeuge aus doctorData und wishData einen Datensatz
 - Erstelle eine Liste mit Objekten aller Dienste 
-  {day, line, availableDoctors, fitness}
-- Ermittle für jeden Dienst, welche Ärzte verfügbar sind
+  {day, line, availableDoctors (direkt ermitteln), fitness}
+- Verteile die only12-Ärzte
+- Trage die Wünsche wenn möglich ein
+  - Ermittle nach jeder Eintragung neu, welche Ärzte verfügbar sind
 - Ermittle für jeden Tag die Fittness
   Faktoren: Wochentag, Feiertagstatus, Anzahl verfügbarer Ärzte
 - Sortiere die Dienste in umgekehrter Reihenfolge nach der Fitness
@@ -62,10 +64,30 @@ export const calcNotAvailableDoctors = (daysData, day, line, doctors) => {
   || (day.imc.includes(doctor.id) || day.emergencyDepartment.includes(doctor.id) || day.house.includes(doctor.id))
   || (previousDay && (previousDay.imc.includes(doctor.id) || previousDay.emergencyDepartment.includes(doctor.id) || previousDay.house.includes(doctor.id)))
   || (nextDay && (nextDay.imc.includes(doctor.id) || nextDay.emergencyDepartment.includes(doctor.id) || nextDay.house.includes(doctor.id)))
-  || (!isBeforeWeekendOrHoliday(daysData, day) && mostFrequentClinic(day, doctors)[doctor.clinic] && mostFrequentClinic(day, doctors)[doctor.clinic] > 1)
+  || (!isBeforeWeekendOrHoliday(daysData, day) && clinicFrequency(day, doctors)[doctor.clinic] && clinicFrequency(day, doctors)[doctor.clinic] > 1)
   )
   ).length;
   };
+
+  export const calcAvailableDoctors = (daysData, day, line, doctors) => {
+    // Find the previous day
+    let previousDay = daysData.find((d) => d.day === day.day - 1);
+    // Find the next day
+    let nextDay = daysData.find((d) => d.day === day.day + 1);
+    // filter the doctors array based on conditions,
+  
+    return doctors.filter(
+    (doctor) =>
+    doctor[line] 
+    && !doctor.only12
+    && !(doctor.noDutyWish.includes(day.day)
+    && !(day.imc.includes(doctor.id) || day.emergencyDepartment.includes(doctor.id) || day.house.includes(doctor.id))
+    && !(previousDay && (previousDay.imc.includes(doctor.id) || previousDay.emergencyDepartment.includes(doctor.id) || previousDay.house.includes(doctor.id)))
+    && !(nextDay && (nextDay.imc.includes(doctor.id) || nextDay.emergencyDepartment.includes(doctor.id) || nextDay.house.includes(doctor.id)))
+    && !(!isBeforeWeekendOrHoliday(daysData, day) && clinicFrequency(day, doctors)[doctor.clinic] && clinicFrequency(day, doctors)[doctor.clinic] > 1)
+    )
+    );
+    };
 
 function isBeforeWeekendOrHoliday(daysData, day) {
   // check if the day is a weekend day
@@ -82,7 +104,7 @@ function isBeforeWeekendOrHoliday(daysData, day) {
   return false;
 }
 
-function mostFrequentClinic(day, doctors) {
+function clinicFrequency(day, doctors) {
   // create an empty object to store clinic frequencies
   const clinicFrequency = {};
   const propertiesToCheck = ["imc", "emergencyDepartment", "house"];
@@ -125,19 +147,20 @@ const calcDayFitness = (daysData, day, line, doctors) => {
   return fitness;
 };
 
-const calcDutyAssignmentPrioList = (daysData, doctors) => {
-  // create a new array of dutyAssignmentFitnessList by mapping over the daysData array
-  // and calling calcDayFitness twice for each dayData element,
-  // once for emergencyDepartment and once for house
-  const dutyAssignmentFitnessList = [
-    ...daysData.map((day) => [
-      day,
-      calcDayFitness(daysData, day, "emergencyDepartment", doctors),
-    ]),
-    ...daysData.map((day) => [day, calcDayFitness(daysData, day, "house", doctors)]),
-  ];
-  // sort the dutyAssignmentFitnessList array in descending order based on the second element of each subarray
-  return dutyAssignmentFitnessList.sort((a, b) => b[1] - a[1]);
+const calcDutyAssignmentList = (daysData, doctors, lines) => {
+  const dutyAssignmentList = []
+  daysData.forEach(day => {
+    lines.forEach(line => {
+      dutyAssignmentList.push({
+        day: day,
+        line: line,
+        availableDoctors: calcAvailableDoctors(daysData, day, line, doctors),
+        fitness: 0
+      })
+    })
+  })
+
+  return dutyAssignmentList.sort((a,b) => a.availableDoctors.length - b.availableDoctors.length)
 };
 
 export default async function autofillPlan(planId, setProgress) {
@@ -146,9 +169,9 @@ export default async function autofillPlan(planId, setProgress) {
   const wishesData = await getWishesFromDB(planId);
 
   const doctors = mergeDoctorsAndWishesData(doctorsData, wishesData);
+  const dutyAssignmentList = calcDutyAssignmentList(daysData, doctors, ["emergencyDepartment", "house"])
 
-  const dutyAssignmentPrioList = calcDutyAssignmentPrioList(daysData, doctors);
-  console.log(dutyAssignmentPrioList);
+  console.log(dutyAssignmentList);
 
   setProgress(100);
   return true;
