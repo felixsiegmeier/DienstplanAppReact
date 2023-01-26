@@ -18,32 +18,22 @@ const mergeDoctorsAndWishesData = (doctorsData, wishesData) => {
   });
 };
 
-// ##################################### Diese Funktion funktioniert noch nicht ########################################
-const calcNotAvailableDoctors = (daysData, day, line, doctors) => {
+
+export const calcNotAvailableDoctors = (daysData, day, line, doctors) => {
   // Find the previous day
   let previousDay = daysData.find((d) => d.day === day.day - 1);
   // Find the next day
   let nextDay = daysData.find((d) => d.day === day.day + 1);
   // filter the doctors array based on conditions,
-  // where the doctor should have at least one of the properties "emergencyDepartment" and "house" set to true and "only12" should be set to false
-  // or the noDutyWish property of the doctor should include the day represented by the day argument or
-  // the id of the doctor should be in the imc, emergencyDepartment or house array of the previous or next day
-  console.log(day.day)
-  console.log(line)
-  console.info(doctors.filter(
-    (doctor) =>
-    ((doctor.emergencyDepartment || doctor.house) && !doctor.only12)
-    || doctor.noDutyWish.includes(day.day)
-    || !doctor[line]
-    || (previousDay && (previousDay.imc.includes(doctor.id) || previousDay.emergencyDepartment.includes(doctor.id) || previousDay.house.includes(doctor.id)))
-    || (nextDay && (nextDay.imc.includes(doctor.id) || nextDay.emergencyDepartment.includes(doctor.id) || nextDay.house.includes(doctor.id)))
-    ))
+
   return doctors.filter(
   (doctor) =>
   ((doctor.emergencyDepartment || doctor.house) && !doctor.only12)
-  || doctor.noDutyWish.includes(day.day)
+  && (doctor.noDutyWish.includes(day.day)
+  || !doctor[line]
+  || (day.imc.includes(doctor.id) || day.emergencyDepartment.includes(doctor.id) || day.house.includes(doctor.id))
   || (previousDay && (previousDay.imc.includes(doctor.id) || previousDay.emergencyDepartment.includes(doctor.id) || previousDay.house.includes(doctor.id)))
-  || (nextDay && (nextDay.imc.includes(doctor.id) || nextDay.emergencyDepartment.includes(doctor.id) || nextDay.house.includes(doctor.id)))
+  || (nextDay && (nextDay.imc.includes(doctor.id) || nextDay.emergencyDepartment.includes(doctor.id) || nextDay.house.includes(doctor.id))))
   ).length;
   };
 
@@ -86,6 +76,7 @@ function mostFrequentClinic(day, doctors) {
       clinicFrequency[a] > clinicFrequency[b] ? a : b
     );
     // return the frequency of the most frequent clinic
+    console.log(clinicFrequency)
     return clinicFrequency[mostFrequentClinic];
   } else {
     return 0;
