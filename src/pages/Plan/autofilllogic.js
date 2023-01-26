@@ -48,28 +48,7 @@ const mergeDoctorsAndWishesData = (doctorsData, wishesData) => {
   });
 };
 
-
-export const calcNotAvailableDoctors = (daysData, day, line, doctors) => {
-  // Find the previous day
-  let previousDay = daysData.find((d) => d.day === day.day - 1);
-  // Find the next day
-  let nextDay = daysData.find((d) => d.day === day.day + 1);
-  // filter the doctors array based on conditions,
-
-  return doctors.filter(
-  (doctor) =>
-  ((doctor.emergencyDepartment || doctor.house) && !doctor.only12)
-  && (doctor.noDutyWish.includes(day.day)
-  || !doctor[line]
-  || (day.imc.includes(doctor.id) || day.emergencyDepartment.includes(doctor.id) || day.house.includes(doctor.id))
-  || (previousDay && (previousDay.imc.includes(doctor.id) || previousDay.emergencyDepartment.includes(doctor.id) || previousDay.house.includes(doctor.id)))
-  || (nextDay && (nextDay.imc.includes(doctor.id) || nextDay.emergencyDepartment.includes(doctor.id) || nextDay.house.includes(doctor.id)))
-  || (!isBeforeWeekendOrHoliday(daysData, day) && clinicFrequency(day, doctors)[doctor.clinic] && clinicFrequency(day, doctors)[doctor.clinic] > 1)
-  )
-  ).length;
-  };
-
-  export const calcAvailableDoctors = (daysData, day, line, doctors) => {
+const calcAvailableDoctors = (daysData, day, line, doctors) => {
     // Find the previous day
     let previousDay = daysData.find((d) => d.day === day.day - 1);
     // Find the next day
@@ -142,7 +121,7 @@ const calcDayFitness = (daysData, day, line, doctors) => {
     fitness += 1 * HOLIDAY_FACTOR;
   }
   fitness +=
-    calcNotAvailableDoctors(daysData, day, line, doctors) * NOT_AVAILABLE_DOCTORS_FACTOR;
+    (doctors.length-calcAvailableDoctors(daysData, day, line, doctors).length) * NOT_AVAILABLE_DOCTORS_FACTOR;
 
   return fitness;
 };
@@ -163,6 +142,17 @@ const calcDutyAssignmentList = (daysData, doctors, lines) => {
   return dutyAssignmentList.sort((a,b) => a.availableDoctors.length - b.availableDoctors.length)
 };
 
+function assignOnly12(dutyAssignmentList, doctors){
+  const docs = doctors.filter(doc => doc.only12)
+  const dutyListOnly12Assigned = [... dutyAssignmentList]
+  docs.forEach(doc => {
+    doc.dutyWish.forEach(wish => {
+      dutyListOnly12Assigned.find(duty => duty.line==="emergencyDepartment" && duty.day.day === wish).day.emergencyDepartment.push(doc.id)
+    })
+  })
+  return dutyListOnly12Assigned
+}
+
 export default async function autofillPlan(planId, setProgress) {
   const daysData = await getDaysFromDB(planId);
   const doctorsData = await getDoctorsFromDB();
@@ -170,8 +160,9 @@ export default async function autofillPlan(planId, setProgress) {
 
   const doctors = mergeDoctorsAndWishesData(doctorsData, wishesData);
   const dutyAssignmentList = calcDutyAssignmentList(daysData, doctors, ["emergencyDepartment", "house"])
+  const dutyListOnly12Assigned = assignOnly12(dutyAssignmentList, doctors)
 
-  console.log(dutyAssignmentList);
+  console.log(dutyListOnly12Assigned);
 
   setProgress(100);
   return true;
