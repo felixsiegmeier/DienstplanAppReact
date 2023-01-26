@@ -7,12 +7,10 @@ import getWishesFromDB from "../../services/getWishesFromDB";
 - Erzeuge aus doctorData und wishData einen Datensatz
 - Erstelle eine Liste mit Objekten aller Dienste 
   {day, line, availableDoctors (direkt ermitteln), fitness}
+  - Sortiere die Dienste in umgekehrter Reihenfolge nach ihrer Fitness
 - Verteile die only12-Ärzte (geht nur über Wünsche! Keine Zufallsvergabe)
 - Trage die Wünsche wenn möglich ein
-  - Ermittle nach jeder Eintragung neu, welche Ärzte verfügbar sind
-- Ermittle für jeden Tag die Fittness
-  Faktoren: Wochentag, Feiertagstatus, Anzahl verfügbarer Ärzte
-- Sortiere die Dienste in umgekehrter Reihenfolge nach der Fitness
+  - Ermittle nach jeder Eintragung neu, welche Ärzte verfügbar sind und wie die Fitness ist
 - Iteriere über die Dienste
   - Ermittle die Fitness aller Ärzte
     Faktoren: Dienstanzahl, Dienstpunkte, Wechselabstand, Wochenendanzahl, Wochenendabstand
@@ -128,7 +126,7 @@ const calcDutys = async (daysData, doctors, lines) => {
   return dutys.filter(duty => 
     duty.day[duty.line].length === 0
     || (duty.day[duty.line].length === 1 && doctors.find(doctor => doctor.id === duty.day[duty.line][0]).only12)
-  ).sort((a,b) => a.availableDoctors.length - b.availableDoctors.length)
+  ).sort((a,b) => a.fitness - b.fitness)
 };
 
 const reCalcDutys = (dutys, daysData, doctors) => {
@@ -137,7 +135,10 @@ const reCalcDutys = (dutys, daysData, doctors) => {
     duty.availableDoctors = availableDoctors;
     duty.fitness = calcDayFitness(daysData, duty.day, duty.line, doctors, availableDoctors);
   });
-  return dutys;
+  return dutys.filter(duty => 
+    duty.day[duty.line].length === 0
+    || (duty.day[duty.line].length === 1 && doctors.find(doctor => doctor.id === duty.day[duty.line][0]).only12)
+  ).sort((a,b) => a.fitness - b.fitness);
 };
 
 async function assignOnly12(dutys, doctors){
