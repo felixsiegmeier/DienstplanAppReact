@@ -14,14 +14,17 @@ import getWishesFromDB from "../../services/getWishesFromDB";
 - Iteriere über die Dienste
   - Ermittle die Fitness aller Ärzte
   - Teile den Arzt mit der besten Fitness ein
-    - wenn das nicht möglich ist: springe eine Evolutionsstufe zurück und nimm den zweitbesten Arzt
-    - Wenn es keinen alternativen Arzt mehr gibt, springe eine weitere Stufe zurück
+    - wenn das nicht möglich ist
+      - Merke dir, dass du einen Zufallsplan erstellst
+      - Starte neu und wähle auf jeder Stufe wenn möglich zufällig zwischen den 2 (..3, ..4, ..5, ..6) besten Ärzten
   - entferne den Dienst aus der Liste
   - Ermittle erneut für jeden Dienst, welche Ärzte verfügbar sind
   - Ermittle erneut für jeden Tag die Fittness
   - Sortiere erneut die Dienste in ungekehrter Reihenfolge nach der Fitness
-- 
-
+- Wenn du einen Zufallsplan erstellt hast
+  - Wiederhole den Prozess, bis du 100 Dienste hast
+  - Bewerte die Dienste nach ihrer Fitness und wähle den Besten aus
+- Gib den Dienstplan aus
 */
 
 
