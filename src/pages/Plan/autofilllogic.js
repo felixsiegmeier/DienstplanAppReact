@@ -2,6 +2,29 @@ import getDaysFromDB from "../../services/getDaysFromDB";
 import getDoctorsFromDB from "../../services/getDoctorsFromDB";
 import getWishesFromDB from "../../services/getWishesFromDB";
 
+/*
+- Hole doctorData, wishData und daysData von der Datenbank
+- Erzeuge aus doctorData und wishData einen Datensatz
+- Erstelle eine Liste mit Objekten aller Dienste 
+  {day, line, availableDoctors, fitness}
+- Ermittle für jeden Dienst, welche Ärzte verfügbar sind
+- Ermittle für jeden Tag die Fittness
+  Faktoren: Wochentag, Feiertagstatus, Anzahl verfügbarer Ärzte
+- Sortiere die Dienste in ungekehrter Reihenfolge nach der Fitness
+- Iteriere über die Dienste
+  - Ermittle die Fitness aller Ärzte
+  - Teile den Arzt mit der besten Fitness ein
+    - wenn das nicht möglich ist: springe eine Evolutionsstufe zurück und nimm den zweitbesten Arzt
+    - Wenn es keinen alternativen Arzt mehr gibt, springe eine weitere Stufe zurück
+  - entferne den Dienst aus der Liste
+  - Ermittle erneut für jeden Dienst, welche Ärzte verfügbar sind
+  - Ermittle erneut für jeden Tag die Fittness
+  - Sortiere erneut die Dienste in ungekehrter Reihenfolge nach der Fitness
+- 
+
+*/
+
+
 const mergeDoctorsAndWishesData = (doctorsData, wishesData) => {
   // map over the doctorsData and for each doctorData,
   return doctorsData.map((doctorData) => {
